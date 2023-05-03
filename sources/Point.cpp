@@ -5,6 +5,8 @@
 using namespace ariel;
 using namespace std;
 
+Point::Point(double x, double y) : x(x), y(y){};
+
 double Point::distance(Point p) const{
     return sqrt(pow(x-p.getX(),2)+pow(y-p.getY(),2));
 }

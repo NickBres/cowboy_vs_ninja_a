@@ -51,6 +51,8 @@ void Cowboy::shoot(Character &enemy)
     if(isAlive() && hasBullets()){
         bullets--;
         enemy.hit(10);
+    }else if (isAlive()){ // no bullets
+        reload();
     }
 }
 bool Cowboy::hasBullets() const
@@ -84,5 +86,35 @@ void Ninja::slash(Character &enemy)
     if (isAlive() && distance(enemy) <= 1)
     {
         enemy.hit(13);
+    }else if (isAlive()){ // too far
+        move(enemy);
     }
+}
+
+void Ninja::print() const
+{
+    cout << "Ninja ";
+    Character::print();
+    cout << " SPEED: " << speed << endl;
+}
+
+// YoungNinja methods
+void YoungNinja::print() const
+{
+    cout << "Young ";
+    Ninja::print();
+}
+
+// OldNinja methods
+void OldNinja::print() const
+{
+    cout << "Old ";
+    Ninja::print();
+}
+
+// TrainedNinja methods
+void TrainedNinja::print() const
+{
+    cout << "Trained ";
+    Ninja::print();
 }
