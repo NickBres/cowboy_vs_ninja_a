@@ -2,6 +2,7 @@
 #include <iostream>
 #include <climits>
 
+
 using namespace ariel;
 using namespace std;
 
@@ -115,22 +116,22 @@ void Team::print() const
 {
     cout << " --------------------------------- " << endl;
     cout << "Team: " << endl;
-    cout << "Members: " << endl;
+    cout << "   Members: " << endl;
 
     // Cowboys
     for (int i = 0; i < cowboyCount; i++)
     {
         if (i == leader)
-            cout << "LEADER ";
-        characters[i]->print();
+            cout << "LEADER";
+        cout << "   " << characters[i]->print() << endl;
     }
     // Ninjas
     int ninjaCount = count - cowboyCount;
     for (int i = 9; i > 9 - ninjaCount; i--)
     {
         if (i == leader)
-            cout << "LEADER ";
-        characters[i]->print();
+            cout << "LEADER";
+        cout << "    " << characters[i]->print() << endl;
     }
     cout << " --------------------------------- " << endl;
 };
@@ -143,7 +144,7 @@ void Team::findNewLeader()
     {
         if (i != leader && characters[i] && characters[i]->isAlive())
         {
-            double distance = characters[i]->distance(*(characters[leader]));
+            double distance = characters[i]->distance(characters[leader]);
             if (distance < minDistance)
             {
                 minDistance = distance;
@@ -161,7 +162,7 @@ void Team::findNewLeader()
     }
 };
 
-int Team::findTarget(Character leader)
+int Team::findTarget(Character *leader)
 {
     int target = -1;
     double minDistance = __DBL_MAX__;
@@ -188,7 +189,7 @@ void Team::attack(Team *otherTeam)
     {
         otherTeam->findNewLeader();
     }
-    int target = otherTeam->findTarget(*(characters[leader])); // find target that close to leader
+    int target = otherTeam->findTarget(characters[leader]); // find target that close to leader
     if (target == -1)
         return;
 
@@ -198,7 +199,7 @@ void Team::attack(Team *otherTeam)
         if (characters[i]->isAlive())
         {
             Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
-            cowboy.shoot(*(otherTeam->characters[target]));
+            cowboy.shoot(otherTeam->characters[target]);
             target = checkTarget(target, otherTeam); // check if target is still alive or find new target
             if (target == -1) return;
         }
@@ -211,8 +212,7 @@ void Team::attack(Team *otherTeam)
         if (characters[i]->isAlive())
         {
             Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
-            cout << "Ninja " << i << " attacks" << "target " << target << endl;
-            ninja.slash(*(otherTeam->characters[target]));
+            ninja.slash(otherTeam->characters[target]);
             target = checkTarget(target, otherTeam); // check if target is still alive or find new target
             if (target == -1) return;
         }
@@ -221,11 +221,9 @@ void Team::attack(Team *otherTeam)
 
 int Team::checkTarget(int target, Team *otherTeam)
 {
-    cout << "here" << endl;
     if (!otherTeam->characters[target]->isAlive())
     {
-        cout << "here2" << endl;
-        target = otherTeam->findTarget(*(characters[leader]));
+        target = otherTeam->findTarget(characters[leader]);
     }
     return target;
 }

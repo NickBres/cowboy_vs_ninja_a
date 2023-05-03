@@ -1,5 +1,6 @@
 #include "Character.hpp"
 
+
 namespace ariel
 {
     class Team
@@ -12,7 +13,7 @@ namespace ariel
 
         bool isAlreadyInTeam(Character *character);   // check if the character is already in the team
         void findNewLeader();                         // find the closest alive character to the leader
-        int findTarget(Character leader);             // find the closest alive character to the given character
+        int findTarget(Character *leader);             // find the closest alive character to the given character
         int checkTarget(int target, Team *otherTeam); // check if the target is alive and find another if not
 
     public:

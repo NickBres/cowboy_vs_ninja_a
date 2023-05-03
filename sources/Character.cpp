@@ -14,13 +14,14 @@ OldNinja::OldNinja(string name, Point position) : Ninja(name, 150, position, 12)
 TrainedNinja::TrainedNinja(string name, Point position) : Ninja(name, 120, position, 12){};
 
 // Character methods
+
 bool Character::isAlive() const
 {
     return health > 0;
 }
-double Character::distance(Character c) const
+double Character::distance(Character *c) const
 {
-    return position.distance(c.getLocation());
+    return position.distance(c->getLocation());
 }
 void Character::hit(int damage)
 {
@@ -35,10 +36,13 @@ Point Character::getLocation() const
 {
     return position;
 }
-void Character::print() const
+string Character::print() const
 {
-    cout << name << " HP: " << health << " POS: ";
-    position.print();
+    string data = "";
+    if (isAlive()) data += name + " HP: " + to_string(health);
+    else data += "("+name+")";
+    data += " POS: " + position.print();
+    return data;
 }
 void Character::setLocation(Point p)
 {
@@ -46,11 +50,11 @@ void Character::setLocation(Point p)
 }
 
 // Cowboy methods
-void Cowboy::shoot(Character &enemy)
+void Cowboy::shoot(Character *enemy)
 {
     if(isAlive() && hasBullets()){
         bullets--;
-        enemy.hit(10);
+        enemy->hit(10);
     }else if (isAlive()){ // no bullets
         reload();
     }
@@ -63,58 +67,38 @@ void Cowboy::reload()
 {
     bullets = 6;
 }
-void Cowboy::print() const
+string Cowboy::print() const
 {
-    cout << "Cowboy ";
-    Character::print();
-    cout << " BULLETS: " << bullets << endl;
+    string data = "C " + Character::print();
+    data += " AMMO: " + to_string(bullets);
+    return data;
 }
 
 // Ninja methods
-void Ninja::move(Character &enemy)
+void Ninja::move(Character *enemy)
 {
     if (isAlive())
     {
-        Point enemyPos = enemy.getLocation();
+        Point enemyPos = enemy->getLocation();
         Point myPos = getLocation();
         Point::moveTowards(myPos, enemyPos, speed); // calculate new position
         setLocation(myPos);                        // set new position
     }
 }
-void Ninja::slash(Character &enemy)
+void Ninja::slash(Character *enemy)
 {
     if (isAlive() && distance(enemy) <= 1)
     {
-        enemy.hit(13);
+        enemy->hit(13);
     }else if (isAlive()){ // too far
         move(enemy);
     }
 }
 
-void Ninja::print() const
+string Ninja::print() const
 {
-    cout << "Ninja ";
-    Character::print();
-    cout << " SPEED: " << speed << endl;
+    string data = "N " + Character::print();
+    data += " SPEED: " + to_string(speed);
+    return data;
 }
 
-// YoungNinja methods
-void YoungNinja::print() const
-{
-    cout << "Young ";
-    Ninja::print();
-}
-
-// OldNinja methods
-void OldNinja::print() const
-{
-    cout << "Old ";
-    Ninja::print();
-}
-
-// TrainedNinja methods
-void TrainedNinja::print() const
-{
-    cout << "Trained ";
-    Ninja::print();
-}

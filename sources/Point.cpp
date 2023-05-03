@@ -1,6 +1,6 @@
 #include "Point.hpp"
+#include <string>
 #include <cmath>
-#include <iostream>
 
 using namespace ariel;
 using namespace std;
@@ -11,8 +11,8 @@ double Point::distance(Point p) const{
     return sqrt(pow(x-p.getX(),2)+pow(y-p.getY(),2));
 }
 
-void Point::print() const{
-    cout << "(" << x << "," << y << ")";
+string Point::print() const{
+    return "(" + to_string(x) + "," + to_string(y) + ")";
 }
 
 double Point::getX() const{

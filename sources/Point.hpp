@@ -1,3 +1,5 @@
+#include <string>
+
 namespace ariel
 {
     class Point
@@ -7,7 +9,7 @@ namespace ariel
     public:
         Point(double x = 0, double y = 0);
         double distance(Point p) const; // distance between two points
-        void print() const;
+        std::string print() const;
         double getX() const;
         double getY() const;
         void setX(double x);
