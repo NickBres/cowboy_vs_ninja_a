@@ -2,6 +2,7 @@
 #include <string>
 #include <cmath>
 #include <stdexcept>
+#include <iomanip>
 
 using namespace ariel;
 using namespace std;
@@ -13,8 +14,11 @@ double Point::distance(Point p) const{
 }
 
 string Point::print() const{
-    return "(" + to_string(cor_x) + "," + to_string(cor_y) + ")";
+    ostringstream out;
+    out << fixed << setprecision(3) << "(" << cor_x << "," << cor_y << ")";
+    return out.str();
 }
+
 
 double Point::getX() const{
     return cor_x;

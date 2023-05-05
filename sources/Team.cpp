@@ -3,7 +3,6 @@
 #include <climits>
 #include <stdexcept>
 
-
 using namespace ariel;
 using namespace std;
 
@@ -26,7 +25,6 @@ Team::Team(Character *leader) : count(0), cowboyCount(0)
     add(leader);
 };
 
-
 // Methods
 
 // All cowboys are added to the beginning of the array, and all ninjas are added to the end of the array
@@ -36,7 +34,8 @@ void Team::add(Character *newCharacter)
     {
         throw runtime_error("Team is full");
         return;
-    }else if (isAlreadyInTeam(newCharacter))
+    }
+    else if (isAlreadyInTeam(newCharacter))
     {
         throw runtime_error("Character already in team");
         return;
@@ -50,7 +49,9 @@ void Team::add(Character *newCharacter)
     else if (n != NULL) // newCharacter is a Ninja
     {
         characters[TEAM_SIZE - 1 - (count - cowboyCount)] = newCharacter;
-    }else{
+    }
+    else
+    {
         throw runtime_error("Invalid character type (not Cowboy or Ninja))");
         return;
     }
@@ -58,7 +59,8 @@ void Team::add(Character *newCharacter)
     count++;
 };
 
-bool Team::isAlreadyInTeam(Character *character){
+bool Team::isAlreadyInTeam(Character *character)
+{
     for (unsigned int i = 0; i < count; i++)
     {
         if (characters[i] == character)
@@ -153,29 +155,33 @@ unsigned int Team::findTarget(Character *leader)
 
 void Team::attack(Team *otherTeam)
 {
-    if(otherTeam == NULL){
+    if (otherTeam == NULL)
+    {
         throw runtime_error("Cant attack NULL team");
         return;
     };
-    if(this == otherTeam){
+    if (this == otherTeam)
+    {
         throw runtime_error("Cant attack itself");
         return;
     };
-    if (stillAlive() == 0){
+    if (stillAlive() == 0)
+    {
         throw runtime_error("Dead/empty team cant attack");
         return;
-    }; 
-    if(otherTeam->stillAlive() == 0){
+    };
+    if (otherTeam->stillAlive() == 0)
+    {
         throw runtime_error("Cant attack dead/empty team");
         return;
     };
-    
+
     if (!otherTeam->characters[otherTeam->leader]->isAlive())
     {
         otherTeam->findNewLeader();
     }
     unsigned int target = otherTeam->findTarget(characters[leader]); // find target that close to leader
-    if (target == TEAM_SIZE) // no target found
+    if (target == TEAM_SIZE)                                         // no target found
         return;
 
     // Cowboys attack first
@@ -186,7 +192,8 @@ void Team::attack(Team *otherTeam)
             Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
             cowboy.shoot(otherTeam->characters[target]);
             target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
-            if (target == TEAM_SIZE) return;
+            if (target == TEAM_SIZE)
+                return;
         }
     }
 
@@ -199,7 +206,8 @@ void Team::attack(Team *otherTeam)
             Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
             ninja.slash(otherTeam->characters[target]);
             target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
-            if (target == TEAM_SIZE) return;
+            if (target == TEAM_SIZE)
+                return;
         }
     }
 };
@@ -211,4 +219,102 @@ unsigned int Team::checkTarget(unsigned int target, Team *otherTeam)
         target = otherTeam->findTarget(characters[leader]);
     }
     return target;
+}
+
+// Team2
+Team2::Team2(Character *leader) : Team(leader){};
+
+void Team2::add(Character *newCharacter)
+{
+    if (count == TEAM_SIZE)
+    {
+        throw runtime_error("Team is full");
+        return;
+    }
+    else if (isAlreadyInTeam(newCharacter))
+    {
+        throw runtime_error("Character already in team");
+        return;
+    }
+    Cowboy *c = dynamic_cast<Cowboy *>(newCharacter);
+    Ninja *n = dynamic_cast<Ninja *>(newCharacter);
+    if (c != NULL || n != NULL)
+    {
+        characters[count++] = newCharacter;
+    }
+    else
+    {
+        throw runtime_error("Invalid character type (not Cowboy or Ninja))");
+        return;
+    }
+}
+
+void Team2::print() const
+{
+    cout << " --------------------------------- " << endl;
+    cout << "Team: " << endl;
+    cout << "   Members: " << endl;
+
+    // Cowboys
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if (i == leader)
+            cout << "LEADER";
+        cout << "   " << characters[i]->print() << endl;
+    }
+    cout << " --------------------------------- " << endl;
+}
+
+void Team2::attack(Team *enemies)
+{
+    if (enemies == NULL)
+    {
+        throw runtime_error("Cant attack NULL team");
+        return;
+    };
+    if (this == enemies)
+    {
+        throw runtime_error("Cant attack itself");
+        return;
+    };
+    if (stillAlive() == 0)
+    {
+        throw runtime_error("Dead/empty team cant attack");
+        return;
+    };
+    if (enemies->stillAlive() == 0)
+    {
+        throw runtime_error("Cant attack dead/empty team");
+        return;
+    };
+
+    if (!enemies->characters[enemies->leader]->isAlive())
+    {
+        enemies->findNewLeader();
+    }
+    unsigned int target = enemies->findTarget(characters[leader]); // find target that close to leader
+    if (target == TEAM_SIZE)                                       // no target found
+        return;
+
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if (characters[i]->isAlive())
+        {
+            Cowboy *c = dynamic_cast<Cowboy *>(characters[i]);
+            Ninja *n = dynamic_cast<Ninja *>(characters[i]);
+            if (c != NULL) //
+            {
+                c->shoot(enemies->characters[target]);
+            }
+            else if (n != NULL)
+            {
+                n->slash(enemies->characters[target]);
+            }
+            target = checkTarget(target, enemies); // check if target is still alive or find a new target
+            if (target == TEAM_SIZE)
+            {
+                target = enemies->findTarget(characters[leader]);
+            }
+        }
+    }
 }

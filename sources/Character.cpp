@@ -26,8 +26,10 @@ double Character::distance(Character *character) const
 }
 void Character::hit(int damage)
 {
-    if (isAlive()) health -= damage; // deal damage only if alive
-    if (health < 0) health = 0;     // health can't be negative
+    if (isAlive())
+        health -= damage; // deal damage only if alive
+    if (health < 0)
+        health = 0; // health can't be negative
 }
 string Character::getName() const
 {
@@ -40,8 +42,10 @@ Point Character::getLocation() const
 string Character::print() const
 {
     string data = "";
-    if (isAlive()) data += name + " HP: " + to_string(health);
-    else data += "("+name+")";
+    if (isAlive())
+        data += name + " HP: " + to_string(health);
+    else
+        data += "(" + name + ")";
     data += " POS: " + position.print();
     return data;
 }
@@ -53,18 +57,25 @@ void Character::setLocation(Point point)
 // Cowboy methods
 void Cowboy::shoot(Character *enemy)
 {
-    if(enemy == NULL){
+    if (enemy == NULL)
+    {
         throw invalid_argument("NULL enemy");
     }
-    if(this == enemy){
+    if (this == enemy)
+    {
         throw invalid_argument("Cowboys can't shoot themselves");
     }
-    if(isAlive() && hasBullets()){
+    if (isAlive() && hasBullets())
+    {
         bullets--;
         enemy->hit(10);
-    }else if (isAlive()){ // no bullets
+    }
+    else if (isAlive())
+    { // no bullets
         reload();
-    }else{
+    }
+    else
+    {
         throw invalid_argument("Dead cowboys can't shoot");
     }
 }
@@ -74,20 +85,25 @@ bool Cowboy::hasBullets() const
 }
 void Cowboy::reload()
 {
-    if(!isAlive()) throw invalid_argument("Dead cowboys can't reload");
+    if (!isAlive())
+        throw invalid_argument("Dead cowboys can't reload");
     bullets = 6;
 }
 string Cowboy::print() const
 {
     string data = "C " + Character::print();
-    data += " AMMO: " + to_string(bullets);
+    if (isAlive())
+    {
+        data += " AMMO: " + to_string(bullets);
+    }
     return data;
 }
 
 // Ninja methods
 void Ninja::move(Character *enemy)
 {
-    if(enemy == NULL){
+    if (enemy == NULL)
+    {
         throw invalid_argument("NULL enemy");
     }
     if (isAlive())
@@ -95,25 +111,33 @@ void Ninja::move(Character *enemy)
         Point enemyPos = enemy->getLocation();
         Point myPos = getLocation();
         Point::moveTowards(myPos, enemyPos, speed); // calculate new position
-        setLocation(myPos);                        // set new position
-    }else{
+        setLocation(myPos);                         // set new position
+    }
+    else
+    {
         throw invalid_argument("Dead ninjas can't move");
     }
 }
 void Ninja::slash(Character *enemy)
 {
-    if(enemy == NULL){
+    if (enemy == NULL)
+    {
         throw invalid_argument("NULL enemy");
     }
-    if(this == enemy){
+    if (this == enemy)
+    {
         throw invalid_argument("Ninjas can't slash themselves");
     }
     if (isAlive() && distance(enemy) <= 1)
     {
         enemy->hit(13);
-    }else if (isAlive()){ // too far
+    }
+    else if (isAlive())
+    { // too far
         move(enemy);
-    }else{
+    }
+    else
+    {
         throw invalid_argument("Dead ninjas can't slash");
     }
 }
@@ -121,7 +145,9 @@ void Ninja::slash(Character *enemy)
 string Ninja::print() const
 {
     string data = "N " + Character::print();
-    data += " SPEED: " + to_string(speed);
+    if (isAlive())
+    {
+        data += " SPEED: " + to_string(speed);
+    }
     return data;
 }
-

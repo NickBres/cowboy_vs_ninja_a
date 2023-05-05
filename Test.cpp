@@ -1,6 +1,9 @@
 #include "doctest.h"
+#include <iostream>
+#include <sstream>
 
 #include "sources/Team.hpp"
+
 
 using namespace ariel;
 
@@ -94,6 +97,19 @@ TEST_CASE("Cowboy shoot test")
 
     CHECK_THROWS(c1.shoot(&c1)); // cannot shoot yourself
     CHECK_THROWS(c1.shoot(NULL)); // cannot shoot NULL
+}
+
+TEST_CASE("Cowboy/Ninja print test")
+{
+    Cowboy c1("John", Point(3, 4));
+    CHECK(c1.print() == "C John HP: 110 POS: (3.000,4.000) AMMO: 6");
+    c1.hit(110);
+    CHECK(c1.print() == "C (John) POS: (3.000,4.000)");
+
+    YoungNinja n1("Bruce", Point(1.2312, 2.3412));
+    CHECK(n1.print() == "N Bruce HP: 100 POS: (1.231,2.341) SPEED: 14");
+    n1.hit(100);
+    CHECK(n1.print() == "N (Bruce) POS: (1.231,2.341)");
 }
 
 TEST_CASE("Ninja constructor test")
@@ -251,6 +267,59 @@ TEST_CASE("attack other team") {
 
     CHECK_THROWS(team.attack(&team2)); // cant attack dead team
     CHECK_THROWS(team2.attack(&team)); // dead team cant attack
-    
 }
+
+TEST_CASE("Team and Team2 have different print output")
+{
+    // Create some characters for team
+    Cowboy c1("Cowboy1", Point(0, 0));
+    YoungNinja n1("Ninja1", Point(0, 0));
+    Cowboy c2("Cowboy2", Point(0, 0));
+    TrainedNinja n2("Ninja2", Point(0, 0));
+
+    // Create some characters for team2
+    Cowboy c1_team2("Cowboy1", Point(0, 0));
+    YoungNinja n1_team2("Ninja1", Point(0, 0));
+    Cowboy c2_team2("Cowboy2", Point(0, 0));
+    TrainedNinja n2_team2("Ninja2", Point(0, 0));
+
+    // Create teams
+    Team team(&c1);
+    Team2 team2(&c1_team2);
+
+    // Add characters to the teams
+    team.add(&n1);
+    team.add(&c2);
+    team.add(&n2);
+
+    team2.add(&n1_team2);
+    team2.add(&c2_team2);
+    team2.add(&n2_team2);
+
+    // Create string streams to capture the print output
+    std::stringstream team_output;
+    std::stringstream team2_output;
+
+    // Redirect the standard output for each team's print() method
+    {
+        std::streambuf *old_cout_buf = std::cout.rdbuf();
+        std::cout.rdbuf(team_output.rdbuf());
+        team.print();
+        std::cout.rdbuf(old_cout_buf);
+    }
+
+    {
+        std::streambuf *old_cout_buf = std::cout.rdbuf();
+        std::cout.rdbuf(team2_output.rdbuf());
+        team2.print();
+        std::cout.rdbuf(old_cout_buf);
+    }
+
+    // Compare the print outputs
+    CHECK(team_output.str() != team2_output.str());
+
+    //team.print();
+    //team2.print();
+}
+
 

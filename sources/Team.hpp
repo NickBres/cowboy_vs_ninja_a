@@ -7,6 +7,7 @@ namespace ariel
     const unsigned int TEAM_SIZE = 10;
     class Team
     {
+    public:
         array<Character *, TEAM_SIZE> characters;
         unsigned int count;
         unsigned int leader;
@@ -18,12 +19,18 @@ namespace ariel
         unsigned int findTarget(Character *leader);             // find the closest alive character to the given character
         unsigned int checkTarget(unsigned int target, Team *otherTeam); // check if the target is alive and find another if not
 
-    public:
         Team(Character *leader);
-        void add(Character *character); // add a character to the team
-        void attack(Team *enemies);   // attack the other team
+        virtual void add(Character *character); // add a character to the team
+        virtual void attack(Team *enemies);   // attack the other team
         int stillAlive() const; // return the number of alive characters
-        void print() const;     // print the team
-        //~Team();
+        virtual void print() const;     // print the team
+    };
+
+    class Team2: public Team{
+        public:
+        Team2(Character *leader);
+        void add(Character *character) override; // add a character to the team
+        void attack(Team *enemies) override;   // attack the other team
+        void print() const override;     // print the team
     };
 }
