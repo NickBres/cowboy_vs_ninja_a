@@ -9,7 +9,7 @@ using namespace std;
 // Constructor
 Team::Team(Character *leader) : count(0), cowboyCount(0)
 {
-    for (int i = 0; i < 10; i++) // initialize all other characters to NULL
+    for (unsigned int i = 0; i < TEAM_SIZE; i++) // initialize all other characters to NULL
     {
         characters[i] = NULL;
     }
@@ -26,18 +26,18 @@ Team::Team(Character *leader) : count(0), cowboyCount(0)
 };
 
 // Destructor
-Team::~Team()
-{
-    for (int i = 0; i < count; i++)
-    {
-        delete characters[i];
-    }
-};
+// Team::~Team()
+// {
+//     for (int i = 0; i < count; i++)
+//     {
+//         delete characters[i];
+//     }
+// };
 
 // Methods
 // void Team::add(Character *newCharacter)
 // {
-//     if (count == 10)
+//     if (count == TEAM_SIZE)
 //     {
 //         throw "Team is full";
 //     }
@@ -55,7 +55,7 @@ Team::~Team()
 // All cowboys are added to the beginning of the array, and all ninjas are added to the end of the array
 void Team::add(Character *newCharacter)
 {
-    if (count == 10)
+    if (count == TEAM_SIZE)
     {
         throw runtime_error("Team is full");
         return;
@@ -71,14 +71,14 @@ void Team::add(Character *newCharacter)
     }
     else // newCharacter is a Ninja
     {
-        int ninjaCount = count - cowboyCount;
-        characters[10 - ninjaCount - 1] = newCharacter;
+        unsigned int ninjaCount = count - cowboyCount;
+        characters[TEAM_SIZE - ninjaCount - 1] = newCharacter;
     }
     count++;
 };
 
 bool Team::isAlreadyInTeam(Character *character){
-    for (int i = 0; i < count; i++)
+    for (unsigned int i = 0; i < count; i++)
     {
         if (characters[i] == character)
         {
@@ -91,7 +91,7 @@ bool Team::isAlreadyInTeam(Character *character){
 int Team::stillAlive() const
 {
     int alive = 0;
-    for (int i = 0; i < 10; i++)
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
         if (characters[i] && characters[i]->isAlive())
         {
@@ -101,17 +101,6 @@ int Team::stillAlive() const
     return alive;
 };
 
-// void Team::print() const
-// {
-//     cout << "Team: " << endl;
-//     cout << "Members: " << endl;
-//     for (int i = 0; i < count; i++)
-//     {
-//         if(i == leader) cout << "LEADER ";
-//         characters[i]->print();
-//     }
-// };
-
 void Team::print() const
 {
     cout << " --------------------------------- " << endl;
@@ -119,15 +108,15 @@ void Team::print() const
     cout << "   Members: " << endl;
 
     // Cowboys
-    for (int i = 0; i < cowboyCount; i++)
+    for (unsigned int i = 0; i < cowboyCount; i++)
     {
         if (i == leader)
             cout << "LEADER";
         cout << "   " << characters[i]->print() << endl;
     }
     // Ninjas
-    int ninjaCount = count - cowboyCount;
-    for (int i = 9; i > 9 - ninjaCount; i--)
+    unsigned int ninjaCount = count - cowboyCount;
+    for (unsigned int i = 9; i > 9 - ninjaCount; i--)
     {
         if (i == leader)
             cout << "LEADER";
@@ -138,9 +127,9 @@ void Team::print() const
 
 void Team::findNewLeader()
 {
-    int newLeader = -1;
+    unsigned int newLeader = TEAM_SIZE;
     double minDistance = __DBL_MAX__;
-    for (int i = 0; i < 10; i++)
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
         if (i != leader && characters[i] && characters[i]->isAlive())
         {
@@ -152,7 +141,7 @@ void Team::findNewLeader()
             }
         }
     }
-    if (newLeader == -1)
+    if (newLeader == TEAM_SIZE)
     {
         throw runtime_error("Cant find new leader.No one is alive.");
     }
@@ -162,11 +151,11 @@ void Team::findNewLeader()
     }
 };
 
-int Team::findTarget(Character *leader)
+unsigned int Team::findTarget(Character *leader)
 {
-    int target = -1;
+    unsigned int target = TEAM_SIZE;
     double minDistance = __DBL_MAX__;
-    for (int i = 0; i < 10; i++)
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
         if (characters[i] && characters[i]->isAlive())
         {
@@ -189,37 +178,37 @@ void Team::attack(Team *otherTeam)
     {
         otherTeam->findNewLeader();
     }
-    int target = otherTeam->findTarget(characters[leader]); // find target that close to leader
-    if (target == -1)
+    unsigned int target = otherTeam->findTarget(characters[leader]); // find target that close to leader
+    if (target == TEAM_SIZE) // no target found
         return;
 
     // Cowboys attack first
-    for (int i = 0; i < cowboyCount; i++)
+    for (unsigned int i = 0; i < cowboyCount; i++)
     {
         if (characters[i]->isAlive())
         {
             Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
             cowboy.shoot(otherTeam->characters[target]);
-            target = checkTarget(target, otherTeam); // check if target is still alive or find new target
-            if (target == -1) return;
+            target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
+            if (target == TEAM_SIZE) return;
         }
     }
 
     // Ninjas attack
-    int ninjaCount = count - cowboyCount;
-    for (int i = 9; i > 9 - ninjaCount; i--)
+    unsigned int ninjaCount = count - cowboyCount;
+    for (unsigned int i = 9; i > 9 - ninjaCount; i--)
     {
         if (characters[i]->isAlive())
         {
             Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
             ninja.slash(otherTeam->characters[target]);
-            target = checkTarget(target, otherTeam); // check if target is still alive or find new target
-            if (target == -1) return;
+            target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
+            if (target == TEAM_SIZE) return;
         }
     }
 };
 
-int Team::checkTarget(int target, Team *otherTeam)
+unsigned int Team::checkTarget(unsigned int target, Team *otherTeam)
 {
     if (!otherTeam->characters[target]->isAlive())
     {

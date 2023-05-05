@@ -5,42 +5,42 @@
 using namespace ariel;
 using namespace std;
 
-Point::Point(double x, double y) : x(x), y(y){};
+Point::Point(double cor_x, double cor_y) : cor_x(cor_x), cor_y(cor_y){};
 
 double Point::distance(Point p) const{
-    return sqrt(pow(x-p.getX(),2)+pow(y-p.getY(),2));
+    return sqrt(pow(cor_x-p.getX(),2)+pow(cor_y-p.getY(),2));
 }
 
 string Point::print() const{
-    return "(" + to_string(x) + "," + to_string(y) + ")";
+    return "(" + to_string(cor_x) + "," + to_string(cor_y) + ")";
 }
 
 double Point::getX() const{
-    return x;
+    return cor_x;
 }
 
 double Point::getY() const{
-    return y;
+    return cor_y;
 }
 
-void Point::setX(double x){
-    this->x = x;
+void Point::setX(double cor_x){
+    this->cor_x = cor_x;
 }
 
-void Point::setY(double y){
-    this->y = y;
+void Point::setY(double cor_y){
+    this->cor_y = cor_y;
 }
 
-void Point::moveTowards(Point &p, Point &q, double dist){
-    double d = p.distance(q);
+void Point::moveTowards(Point &point1, Point &point2, double dist){
+    double d = point1.distance(point2);
     if(d <= dist){
-        p = q;
+        point1 = point2;
     }
     else{
-        double dx = q.getX() - p.getX();
-        double dy = q.getY() - p.getY();
+        double dx = point2.getX() - point1.getX();
+        double dy = point2.getY() - point1.getY();
         double ratio = dist/d;
-        p.setX(p.getX() + dx*ratio);
-        p.setY(p.getY() + dy*ratio);
+        point1.setX(point1.getX() + dx*ratio);
+        point1.setY(point1.getY() + dy*ratio);
     }
 }

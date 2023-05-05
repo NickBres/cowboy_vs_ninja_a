@@ -19,9 +19,9 @@ bool Character::isAlive() const
 {
     return health > 0;
 }
-double Character::distance(Character *c) const
+double Character::distance(Character *character) const
 {
-    return position.distance(c->getLocation());
+    return position.distance(character->getLocation());
 }
 void Character::hit(int damage)
 {
@@ -44,9 +44,9 @@ string Character::print() const
     data += " POS: " + position.print();
     return data;
 }
-void Character::setLocation(Point p)
+void Character::setLocation(Point point)
 {
-    position = p;
+    position = point;
 }
 
 // Cowboy methods
