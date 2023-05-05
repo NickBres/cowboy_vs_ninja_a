@@ -180,7 +180,7 @@ TEST_CASE("TrainedNinja constructor test")
     CHECK(n1.getLocation().getY() == 2);
 }
 
-TEST_CASE("Ninjas move different by type test")
+TEST_CASE("Ninjas are different by type test")
 {
     YoungNinja n1("Billy", Point(1, 2)); // move speed 14 by default
     OldNinja n2("Bobby", Point(1, 2)); // move speed 12 by default
@@ -199,6 +199,14 @@ TEST_CASE("Ninjas move different by type test")
     n3.move(&c);
     CHECK(n3.getLocation().getX() == n2.getLocation().getX());
     CHECK(n3.getLocation().getY() == n2.getLocation().getY());    
+
+    YoungNinja n4("Same", Point(1, 2));
+    OldNinja n5("Same", Point(1, 2));
+    TrainedNinja n6("Same", Point(1, 2));
+
+    CHECK(n4.print() != n5.print()); // will be different because of move speed and hp
+    CHECK(n5.print() != n6.print());
+    CHECK(n6.print() != n4.print());
 }
 
 TEST_CASE("add character to team") {
@@ -321,5 +329,7 @@ TEST_CASE("Team and Team2 have different print output")
     //team.print();
     //team2.print();
 }
+
+
 
 
