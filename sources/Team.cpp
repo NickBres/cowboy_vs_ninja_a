@@ -1,6 +1,7 @@
 #include "Team.hpp"
 #include <iostream>
 #include <climits>
+#include <stdexcept>
 
 
 using namespace ariel;
@@ -25,32 +26,8 @@ Team::Team(Character *leader) : count(0), cowboyCount(0)
     add(leader);
 };
 
-// Destructor
-// Team::~Team()
-// {
-//     for (int i = 0; i < count; i++)
-//     {
-//         delete characters[i];
-//     }
-// };
 
 // Methods
-// void Team::add(Character *newCharacter)
-// {
-//     if (count == TEAM_SIZE)
-//     {
-//         throw "Team is full";
-//     }
-//     for (int i = 0; i < count; i++)
-//     {
-//         if (characters[i] == newCharacter)
-//         {
-//             throw "Character already in team";
-//         }
-//     }
-//     characters[count] = newCharacter;
-//     count++;
-// };
 
 // All cowboys are added to the beginning of the array, and all ninjas are added to the end of the array
 void Team::add(Character *newCharacter)
@@ -65,15 +42,19 @@ void Team::add(Character *newCharacter)
         return;
     }
     Cowboy *c = dynamic_cast<Cowboy *>(newCharacter);
+    Ninja *n = dynamic_cast<Ninja *>(newCharacter);
     if (c != NULL) // newCharacter is a Cowboy
     {
         characters[cowboyCount++] = newCharacter;
     }
-    else // newCharacter is a Ninja
+    else if (n != NULL) // newCharacter is a Ninja
     {
-        unsigned int ninjaCount = count - cowboyCount;
-        characters[TEAM_SIZE - ninjaCount - 1] = newCharacter;
+        characters[TEAM_SIZE - 1 - (count - cowboyCount)] = newCharacter;
+    }else{
+        throw runtime_error("Invalid character type (not Cowboy or Ninja))");
+        return;
     }
+
     count++;
 };
 
@@ -172,7 +153,22 @@ unsigned int Team::findTarget(Character *leader)
 
 void Team::attack(Team *otherTeam)
 {
-    if (stillAlive() == 0 || otherTeam->stillAlive() == 0) return; 
+    if(otherTeam == NULL){
+        throw runtime_error("Cant attack NULL team");
+        return;
+    };
+    if(this == otherTeam){
+        throw runtime_error("Cant attack itself");
+        return;
+    };
+    if (stillAlive() == 0){
+        throw runtime_error("Dead/empty team cant attack");
+        return;
+    }; 
+    if(otherTeam->stillAlive() == 0){
+        throw runtime_error("Cant attack dead/empty team");
+        return;
+    };
     
     if (!otherTeam->characters[otherTeam->leader]->isAlive())
     {

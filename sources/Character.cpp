@@ -1,6 +1,7 @@
 #include "Character.hpp"
 #include <string>
 #include <iostream>
+#include <stdexcept>
 
 using namespace std;
 using namespace ariel;
@@ -52,11 +53,19 @@ void Character::setLocation(Point point)
 // Cowboy methods
 void Cowboy::shoot(Character *enemy)
 {
+    if(enemy == NULL){
+        throw invalid_argument("NULL enemy");
+    }
+    if(this == enemy){
+        throw invalid_argument("Cowboys can't shoot themselves");
+    }
     if(isAlive() && hasBullets()){
         bullets--;
         enemy->hit(10);
     }else if (isAlive()){ // no bullets
         reload();
+    }else{
+        throw invalid_argument("Dead cowboys can't shoot");
     }
 }
 bool Cowboy::hasBullets() const
@@ -65,6 +74,7 @@ bool Cowboy::hasBullets() const
 }
 void Cowboy::reload()
 {
+    if(!isAlive()) throw invalid_argument("Dead cowboys can't reload");
     bullets = 6;
 }
 string Cowboy::print() const
@@ -77,21 +87,34 @@ string Cowboy::print() const
 // Ninja methods
 void Ninja::move(Character *enemy)
 {
+    if(enemy == NULL){
+        throw invalid_argument("NULL enemy");
+    }
     if (isAlive())
     {
         Point enemyPos = enemy->getLocation();
         Point myPos = getLocation();
         Point::moveTowards(myPos, enemyPos, speed); // calculate new position
         setLocation(myPos);                        // set new position
+    }else{
+        throw invalid_argument("Dead ninjas can't move");
     }
 }
 void Ninja::slash(Character *enemy)
 {
+    if(enemy == NULL){
+        throw invalid_argument("NULL enemy");
+    }
+    if(this == enemy){
+        throw invalid_argument("Ninjas can't slash themselves");
+    }
     if (isAlive() && distance(enemy) <= 1)
     {
         enemy->hit(13);
     }else if (isAlive()){ // too far
         move(enemy);
+    }else{
+        throw invalid_argument("Dead ninjas can't slash");
     }
 }
 

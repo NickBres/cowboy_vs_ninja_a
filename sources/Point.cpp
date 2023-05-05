@@ -1,6 +1,7 @@
 #include "Point.hpp"
 #include <string>
 #include <cmath>
+#include <stdexcept>
 
 using namespace ariel;
 using namespace std;
@@ -32,6 +33,9 @@ void Point::setY(double cor_y){
 }
 
 void Point::moveTowards(Point &point1, Point &point2, double dist){
+    if(dist < 0){
+        throw runtime_error( "distance cannot be negative");
+    }
     double d = point1.distance(point2);
     if(d <= dist){
         point1 = point2;

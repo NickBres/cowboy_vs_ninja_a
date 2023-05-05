@@ -22,6 +22,8 @@ TEST_CASE("Point moveTowards test")
     Point::moveTowards(p1, p2, 10.0);
     CHECK(p1.getX() == doctest::Approx(3.0));
     CHECK(p1.getY() == doctest::Approx(4.0));
+
+    CHECK_THROWS(Point::moveTowards(p1, p2, -1.0)); // distance cannot be negative
 }
 
 TEST_CASE("Character constructor test")
@@ -86,6 +88,12 @@ TEST_CASE("Cowboy shoot test")
     CHECK(c1.hasBullets() == true);
     c1.shoot(&c2); // final shot
     CHECK(c2.isAlive() == false);
+    
+    CHECK_THROWS(c2.shoot(&c1)); // c2 is dead
+    CHECK_THROWS(c2.reload()); 
+
+    CHECK_THROWS(c1.shoot(&c1)); // cannot shoot yourself
+    CHECK_THROWS(c1.shoot(NULL)); // cannot shoot NULL
 }
 
 TEST_CASE("Ninja constructor test")
@@ -104,6 +112,29 @@ TEST_CASE("Ninja move test")
     n1.move(&n2);
     CHECK(n1.getLocation().getX() == doctest::Approx(3.1213));
     CHECK(n1.getLocation().getY() == doctest::Approx(4.1213));
+
+    n1.hit(100);
+    CHECK_THROWS(n1.move(&n2)); // n1 is dead
+    CHECK_THROWS(n2.move(NULL)); // cannot move to NULL
+}
+
+TEST_CASE("Ninja slash test")
+{
+    Ninja n1("Bruce", 100, Point(1, 2), 3); // 13 damage by default
+    Ninja n2("Chuck", 10, Point(3, 4), 2);
+
+    n1.slash(&n2); // will not slash because n2 is too far instead will move towards n2
+    CHECK(n1.getLocation().getX() == doctest::Approx(3));
+    CHECK(n1.getLocation().getY() == doctest::Approx(4));
+    CHECK(n2.isAlive() == true);
+
+    n1.slash(&n2); // will slash because n2 is close enough
+    CHECK(n2.isAlive() == false);
+
+    CHECK_THROWS(n2.slash(&n1)); // n2 is dead
+    CHECK_THROWS(n1.slash(NULL)); // cannot slash NULL
+    CHECK_THROWS(n1.slash(&n1)); // cannot slash yourself
+
 }
 
 TEST_CASE("YoungNinja constructor test")
@@ -133,7 +164,7 @@ TEST_CASE("TrainedNinja constructor test")
     CHECK(n1.getLocation().getY() == 2);
 }
 
-TEST_CASE("Ninjas move test")
+TEST_CASE("Ninjas move different by type test")
 {
     YoungNinja n1("Billy", Point(1, 2)); // move speed 14 by default
     OldNinja n2("Bobby", Point(1, 2)); // move speed 12 by default
@@ -165,8 +196,32 @@ TEST_CASE("add character to team") {
     team.add(&ninja);
     CHECK(team.stillAlive() == 2);
 
-    // add ninja with same name as cowboy to team
+    //cant add same character twice
     CHECK_THROWS(team.add(&cowboy));
+    Character c("c", 100, Point(0, 0));
+    CHECK_THROWS(team.add(&c)); // c is not a cowboy or ninja
+
+    // add 8 more characters
+    Cowboy c1("c1", Point(0, 0));
+    Cowboy c2("c2", Point(0, 0));
+    Cowboy c3("c3", Point(0, 0));
+    Cowboy c4("c4", Point(0, 0));
+    Cowboy c5("c5", Point(0, 0));
+    Cowboy c6("c6", Point(0, 0));
+    Cowboy c7("c7", Point(0, 0));
+    Cowboy c8("c8", Point(0, 0));
+    Cowboy c9("c9", Point(0, 0));
+
+    team.add(&c1);
+    team.add(&c2);
+    team.add(&c3);
+    team.add(&c4);
+    team.add(&c5);
+    team.add(&c6);
+    team.add(&c7);
+    team.add(&c8);
+
+    CHECK_THROWS(team.add(&c9)); // team is full
 }
 
 TEST_CASE("attack other team") {
@@ -180,10 +235,22 @@ TEST_CASE("attack other team") {
     Team team(&cowboy); // cowboy is the leader
     team.add(&ninja);
 
+    CHECK_THROWS(team.attack(&team)); // cant attack yourself
+    CHECK_THROWS(team.attack(NULL)); // cant attack NULL
+
     Team team2(&cowboy2); // cowboy2 is the leader
     team2.add(&oldNinja);
     team2.add(&trainedNinja);
 
     team.attack(&team2);
     CHECK(team2.stillAlive() == 3);
+
+    while (team2.stillAlive() > 0) {
+        team.attack(&team2);
+    }
+
+    CHECK_THROWS(team.attack(&team2)); // cant attack dead team
+    CHECK_THROWS(team2.attack(&team)); // dead team cant attack
+    
 }
+
