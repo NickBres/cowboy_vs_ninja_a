@@ -279,23 +279,19 @@ TEST_CASE("attack other team") {
 
 TEST_CASE("Team and Team2 have different print output")
 {
-    // Create some characters for team
     Cowboy c1("Cowboy1", Point(0, 0));
     YoungNinja n1("Ninja1", Point(0, 0));
     Cowboy c2("Cowboy2", Point(0, 0));
     TrainedNinja n2("Ninja2", Point(0, 0));
 
-    // Create some characters for team2
     Cowboy c1_team2("Cowboy1", Point(0, 0));
     YoungNinja n1_team2("Ninja1", Point(0, 0));
     Cowboy c2_team2("Cowboy2", Point(0, 0));
     TrainedNinja n2_team2("Ninja2", Point(0, 0));
 
-    // Create teams
     Team team(&c1);
     Team2 team2(&c1_team2);
 
-    // Add characters to the teams
     team.add(&n1);
     team.add(&c2);
     team.add(&n2);
@@ -308,7 +304,7 @@ TEST_CASE("Team and Team2 have different print output")
     std::stringstream team_output;
     std::stringstream team2_output;
 
-    // Redirect the standard output for each team's print() method
+    // Redirect the standard output for each team's print method
     {
         std::streambuf *old_cout_buf = std::cout.rdbuf();
         std::cout.rdbuf(team_output.rdbuf());
@@ -323,13 +319,8 @@ TEST_CASE("Team and Team2 have different print output")
         std::cout.rdbuf(old_cout_buf);
     }
 
-    // Compare the print outputs
     CHECK(team_output.str() != team2_output.str());
 
     //team.print();
     //team2.print();
 }
-
-
-
-

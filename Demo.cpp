@@ -49,10 +49,6 @@ int main()
    else
       cout << "winner is team_B" << endl;
 
-   Team2 team_A2(tom);
-   team_A2.add(new YoungNinja("Yogi", Point(64, 57)));
-
-   team_A2.print();
 
    return 0; // no memory issues. Team should free the memory of its members. both a and b teams are on the stack.
 }

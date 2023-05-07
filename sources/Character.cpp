@@ -14,7 +14,13 @@ YoungNinja::YoungNinja(string name, Point position) : Ninja(name, 100, position,
 OldNinja::OldNinja(string name, Point position) : Ninja(name, 150, position, 12){};
 TrainedNinja::TrainedNinja(string name, Point position) : Ninja(name, 120, position, 12){};
 
+
 // Character methods
+
+int Character::getHealth() const
+{
+    return health;
+}
 
 bool Character::isAlive() const
 {

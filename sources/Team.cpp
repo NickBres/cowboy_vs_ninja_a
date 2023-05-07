@@ -7,24 +7,42 @@ using namespace ariel;
 using namespace std;
 
 // Constructor
-Team::Team(Character *leader) : count(0), cowboyCount(0)
+Team::Team(Character *leader)
 {
-    for (unsigned int i = 0; i < TEAM_SIZE; i++) // initialize all other characters to NULL
-    {
-        characters[i] = NULL;
-    }
-    Cowboy *c = dynamic_cast<Cowboy *>(leader);
-    if (c != NULL) // leader is a Cowboy
-    {
-        this->leader = 0;
-    }
-    else // leader is a Ninja
-    {
-        this->leader = 9;
-    }
+    this->leader = leader;
     add(leader);
 };
-
+//Destructor
+Team::~Team()
+{
+    leader = NULL;
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if(!characters[i])
+            delete characters[i];
+        characters[i] = NULL;
+    }
+};
+Team2::~Team2()
+{
+    leader = NULL;
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if(!characters[i])
+            delete characters[i];
+        characters[i] = NULL;
+    }
+};
+SmartTeam::~SmartTeam()
+{
+    leader = NULL;
+    for (unsigned int i = 0; i < count; i++)
+    {
+        if(!characters[i])
+            delete characters[i];
+        characters[i] = NULL;
+    }
+};
 // Methods
 
 // All cowboys are added to the beginning of the array, and all ninjas are added to the end of the array
@@ -93,7 +111,7 @@ void Team::print() const
     // Cowboys
     for (unsigned int i = 0; i < cowboyCount; i++)
     {
-        if (i == leader)
+        if (characters[i] == leader)
             cout << "LEADER";
         cout << "   " << characters[i]->print() << endl;
     }
@@ -101,7 +119,7 @@ void Team::print() const
     unsigned int ninjaCount = count - cowboyCount;
     for (unsigned int i = 9; i > 9 - ninjaCount; i--)
     {
-        if (i == leader)
+        if (characters[i] == leader)
             cout << "LEADER";
         cout << "    " << characters[i]->print() << endl;
     }
@@ -110,48 +128,10 @@ void Team::print() const
 
 void Team::findNewLeader()
 {
-    unsigned int newLeader = TEAM_SIZE;
-    double minDistance = __DBL_MAX__;
-    for (unsigned int i = 0; i < TEAM_SIZE; i++)
-    {
-        if (i != leader && characters[i] && characters[i]->isAlive())
-        {
-            double distance = characters[i]->distance(characters[leader]);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                newLeader = i;
-            }
-        }
-    }
-    if (newLeader == TEAM_SIZE)
-    {
-        throw runtime_error("Cant find new leader.No one is alive.");
-    }
-    else
-    {
-        leader = newLeader;
-    }
+    leader = findClosest(leader, this);
 };
 
-unsigned int Team::findTarget(Character *leader)
-{
-    unsigned int target = TEAM_SIZE;
-    double minDistance = __DBL_MAX__;
-    for (unsigned int i = 0; i < TEAM_SIZE; i++)
-    {
-        if (characters[i] && characters[i]->isAlive())
-        {
-            double distance = characters[i]->distance(leader);
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                target = i;
-            }
-        }
-    }
-    return target;
-}
+
 
 void Team::attack(Team *otherTeam)
 {
@@ -176,12 +156,12 @@ void Team::attack(Team *otherTeam)
         return;
     };
 
-    if (!otherTeam->characters[otherTeam->leader]->isAlive())
+    if (!leader->isAlive())
     {
-        otherTeam->findNewLeader();
+       findNewLeader();
     }
-    unsigned int target = otherTeam->findTarget(characters[leader]); // find target that close to leader
-    if (target == TEAM_SIZE)                                         // no target found
+    Character* target = findClosest(leader,otherTeam); // find target that close to leader
+    if (!target)                                         // no target found
         return;
 
     // Cowboys attack first
@@ -190,9 +170,9 @@ void Team::attack(Team *otherTeam)
         if (characters[i]->isAlive())
         {
             Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
-            cowboy.shoot(otherTeam->characters[target]);
+            cowboy.shoot(target);
             target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
-            if (target == TEAM_SIZE)
+            if (!target)
                 return;
         }
     }
@@ -204,19 +184,19 @@ void Team::attack(Team *otherTeam)
         if (characters[i]->isAlive())
         {
             Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
-            ninja.slash(otherTeam->characters[target]);
+            ninja.slash(target);
             target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
-            if (target == TEAM_SIZE)
+            if (!target)
                 return;
         }
     }
 };
 
-unsigned int Team::checkTarget(unsigned int target, Team *otherTeam)
+Character* Team::checkTarget(Character* target, Team *otherTeam)
 {
-    if (!otherTeam->characters[target]->isAlive())
+    if (!target->isAlive())
     {
-        target = otherTeam->findTarget(characters[leader]);
+        target = findClosest(leader,otherTeam);
     }
     return target;
 }
@@ -258,7 +238,7 @@ void Team2::print() const
     // Cowboys
     for (unsigned int i = 0; i < count; i++)
     {
-        if (i == leader)
+        if (characters[i] == leader)
             cout << "LEADER";
         cout << "   " << characters[i]->print() << endl;
     }
@@ -288,12 +268,12 @@ void Team2::attack(Team *enemies)
         return;
     };
 
-    if (!enemies->characters[enemies->leader]->isAlive())
+    if (!enemies->leader->isAlive())
     {
         enemies->findNewLeader();
     }
-    unsigned int target = enemies->findTarget(characters[leader]); // find target that close to leader
-    if (target == TEAM_SIZE)                                       // no target found
+    Character* target = findClosest(leader,enemies);// find target that close to leader
+    if (!target)                                       // no target found
         return;
 
     for (unsigned int i = 0; i < count; i++)
@@ -304,17 +284,106 @@ void Team2::attack(Team *enemies)
             Ninja *n = dynamic_cast<Ninja *>(characters[i]);
             if (c != NULL) //
             {
-                c->shoot(enemies->characters[target]);
+                c->shoot(target);
             }
             else if (n != NULL)
             {
-                n->slash(enemies->characters[target]);
+                n->slash(target);
             }
             target = checkTarget(target, enemies); // check if target is still alive or find a new target
-            if (target == TEAM_SIZE)
+            if (!target)
             {
-                target = enemies->findTarget(characters[leader]);
+                return;
             }
         }
     }
+}
+
+//Smart Team
+
+SmartTeam::SmartTeam(Character *leader) : Team(leader){};
+
+void SmartTeam::attack(Team *otherTeam){
+
+    if (otherTeam == NULL)
+    {
+        throw runtime_error("Cant attack NULL team");
+        return;
+    };
+    if (this == otherTeam)
+    {
+        throw runtime_error("Cant attack itself");
+        return;
+    };
+    if (stillAlive() == 0)
+    {
+        throw runtime_error("Dead/empty team cant attack");
+        return;
+    };
+    if (otherTeam->stillAlive() == 0)
+    {
+        throw runtime_error("Cant attack dead/empty team");
+        return;
+    };
+
+    // Ninjas attack first close enemies
+    unsigned int ninjaCount = count - cowboyCount;
+    for (unsigned int i = 9; i > 9 - ninjaCount; i--)
+    {
+        if (characters[i]->isAlive())
+        {
+            Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
+            Character* closestEnemy = findClosest(characters[i], otherTeam);
+            ninja.slash(closestEnemy);
+        }
+    }
+
+   
+    // Cowboys attack enemies with lowest health
+    for (unsigned int i = 0; i < cowboyCount; i++)
+    {
+        if (characters[i]->isAlive())
+        {
+            Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
+            Character* weakestEnemy = findWeakestEnemy(otherTeam);
+            cowboy.shoot(weakestEnemy);
+        }
+    }
+    
+}
+
+Character* Team::findClosest(Character* character, Team* team){
+    Character* closest = NULL;
+    int minDistance = INT_MAX;
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
+    {
+        if (team->characters[i] && team->characters[i]->isAlive())
+        {
+            int distance = character->distance(team->characters[i]);
+            if (distance < minDistance)
+            {
+                minDistance = distance;
+                closest = team->characters[i];
+            }
+        }
+    }
+    return closest;
+}
+
+Character* SmartTeam::findWeakestEnemy(Team *otherTeam){
+    Character* weakestEnemy = NULL;
+    int minHealth = INT_MAX;
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
+    {
+        if (characters[i] && characters[i]->isAlive())
+        {
+            int health = otherTeam->characters[i]->getHealth();
+            if (health < minHealth)
+            {
+                minHealth = health;
+                weakestEnemy = characters[i];
+            }
+        }
+    }
+    return weakestEnemy;
 }

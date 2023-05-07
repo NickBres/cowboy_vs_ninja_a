@@ -21,6 +21,7 @@ namespace ariel
         Point getLocation() const;
         virtual string print() const;
         void setLocation(Point point);
+        int getHealth() const;
 
         Character(const Character &) = default;
         Character &operator=(const Character &) = default;
