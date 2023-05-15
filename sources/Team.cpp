@@ -9,39 +9,45 @@ using namespace std;
 // Constructor
 Team::Team(Character *leader)
 {
+    if (leader->isLeader())
+    {
+        throw runtime_error("Character is already a leader");
+        return;
+    }
+    leader->setLeader();
     this->leader = leader;
     add(leader);
 };
-//Destructor
+// Destructor
 Team::~Team()
 {
-    leader = NULL;
-    for (unsigned int i = 0; i < count; i++)
+    
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
-        if(!characters[i])
-            delete characters[i];
+        delete characters[i];
         characters[i] = NULL;
     }
+    leader = NULL;
 };
 Team2::~Team2()
 {
-    leader = NULL;
-    for (unsigned int i = 0; i < count; i++)
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
-        if(!characters[i])
-            delete characters[i];
+        delete characters[i];
         characters[i] = NULL;
     }
+
+    leader = NULL;
 };
 SmartTeam::~SmartTeam()
 {
-    leader = NULL;
-    for (unsigned int i = 0; i < count; i++)
+    for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
-        if(!characters[i])
-            delete characters[i];
+        delete characters[i];
         characters[i] = NULL;
     }
+
+    leader = NULL;
 };
 // Methods
 
@@ -58,6 +64,12 @@ void Team::add(Character *newCharacter)
         throw runtime_error("Character already in team");
         return;
     }
+    else if (newCharacter->isInTeam())
+    {
+        throw runtime_error("Character is already in a team");
+        return;
+    }
+    newCharacter->addedToTeam();
     Cowboy *c = dynamic_cast<Cowboy *>(newCharacter);
     Ninja *n = dynamic_cast<Ninja *>(newCharacter);
     if (c != NULL) // newCharacter is a Cowboy
@@ -129,20 +141,19 @@ void Team::print() const
 void Team::findNewLeader()
 {
     leader = findClosest(leader, this);
+    leader->setLeader();
 };
-
-
 
 void Team::attack(Team *otherTeam)
 {
     if (otherTeam == NULL)
     {
-        throw runtime_error("Cant attack NULL team");
+        throw invalid_argument("Cant attack NULL team");
         return;
     };
     if (this == otherTeam)
     {
-        throw runtime_error("Cant attack itself");
+        throw invalid_argument("Cant attack itself");
         return;
     };
     if (stillAlive() == 0)
@@ -158,10 +169,10 @@ void Team::attack(Team *otherTeam)
 
     if (!leader->isAlive())
     {
-       findNewLeader();
+        findNewLeader();
     }
-    Character* target = findClosest(leader,otherTeam); // find target that close to leader
-    if (!target)                                         // no target found
+    Character *target = findClosest(leader, otherTeam); // find target that close to leader
+    if (!target)                                        // no target found
         return;
 
     // Cowboys attack first
@@ -170,7 +181,14 @@ void Team::attack(Team *otherTeam)
         if (characters[i]->isAlive())
         {
             Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
-            cowboy.shoot(target);
+            if (cowboy.hasboolets())
+            {
+                cowboy.shoot(target);
+            }
+            else
+            {
+                cowboy.reload();
+            }
             target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
             if (!target)
                 return;
@@ -184,7 +202,14 @@ void Team::attack(Team *otherTeam)
         if (characters[i]->isAlive())
         {
             Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
-            ninja.slash(target);
+            if (ninja.distance(target) <= 1)
+            {
+                ninja.slash(target);
+            }
+            else
+            {
+                ninja.move(target);
+            }
             target = checkTarget(target, otherTeam); // check if target is still alive or find a new target
             if (!target)
                 return;
@@ -192,17 +217,27 @@ void Team::attack(Team *otherTeam)
     }
 };
 
-Character* Team::checkTarget(Character* target, Team *otherTeam)
+Character *Team::checkTarget(Character *target, Team *otherTeam)
 {
     if (!target->isAlive())
     {
-        target = findClosest(leader,otherTeam);
+        target = findClosest(leader, otherTeam);
     }
     return target;
 }
 
 // Team2
-Team2::Team2(Character *leader) : Team(leader){};
+Team2::Team2(Character *leader)
+{
+    if (leader->isLeader())
+    {
+        throw runtime_error("Already a leader");
+        return;
+    }
+    leader->setLeader();
+    this->leader = leader;
+    this->add(leader);
+};
 
 void Team2::add(Character *newCharacter)
 {
@@ -214,6 +249,11 @@ void Team2::add(Character *newCharacter)
     else if (isAlreadyInTeam(newCharacter))
     {
         throw runtime_error("Character already in team");
+        return;
+    }
+    else if (newCharacter->isInTeam())
+    {
+        throw runtime_error("Character is already in a team");
         return;
     }
     Cowboy *c = dynamic_cast<Cowboy *>(newCharacter);
@@ -249,12 +289,12 @@ void Team2::attack(Team *enemies)
 {
     if (enemies == NULL)
     {
-        throw runtime_error("Cant attack NULL team");
+        throw invalid_argument("Cant attack NULL team");
         return;
     };
     if (this == enemies)
     {
-        throw runtime_error("Cant attack itself");
+        throw invalid_argument("Cant attack itself");
         return;
     };
     if (stillAlive() == 0)
@@ -264,16 +304,16 @@ void Team2::attack(Team *enemies)
     };
     if (enemies->stillAlive() == 0)
     {
-        throw runtime_error("Cant attack dead/empty team");
+        throw invalid_argument("Cant attack dead/empty team");
         return;
     };
 
-    if (!enemies->leader->isAlive())
+    if (!leader->isAlive())
     {
-        enemies->findNewLeader();
+        findNewLeader();
     }
-    Character* target = findClosest(leader,enemies);// find target that close to leader
-    if (!target)                                       // no target found
+    Character *target = findClosest(leader, enemies); // find target that close to leader
+    if (!target)                                      // no target found
         return;
 
     for (unsigned int i = 0; i < count; i++)
@@ -284,11 +324,25 @@ void Team2::attack(Team *enemies)
             Ninja *n = dynamic_cast<Ninja *>(characters[i]);
             if (c != NULL) //
             {
-                c->shoot(target);
+                if (c->hasboolets())
+                {
+                    c->shoot(target);
+                }
+                else
+                {
+                    c->reload();
+                }
             }
             else if (n != NULL)
             {
-                n->slash(target);
+                if (n->distance(target) <= 1)
+                {
+                    n->slash(target);
+                }
+                else
+                {
+                    n->move(target);
+                }
             }
             target = checkTarget(target, enemies); // check if target is still alive or find a new target
             if (!target)
@@ -299,20 +353,21 @@ void Team2::attack(Team *enemies)
     }
 }
 
-//Smart Team
+// Smart Team
 
 SmartTeam::SmartTeam(Character *leader) : Team(leader){};
 
-void SmartTeam::attack(Team *otherTeam){
+void SmartTeam::attack(Team *otherTeam)
+{
 
     if (otherTeam == NULL)
     {
-        throw runtime_error("Cant attack NULL team");
+        throw invalid_argument("Cant attack NULL team");
         return;
     };
     if (this == otherTeam)
     {
-        throw runtime_error("Cant attack itself");
+        throw invalid_argument("Cant attack itself");
         return;
     };
     if (stillAlive() == 0)
@@ -322,7 +377,7 @@ void SmartTeam::attack(Team *otherTeam){
     };
     if (otherTeam->stillAlive() == 0)
     {
-        throw runtime_error("Cant attack dead/empty team");
+        throw invalid_argument("Cant attack dead/empty team");
         return;
     };
 
@@ -333,27 +388,40 @@ void SmartTeam::attack(Team *otherTeam){
         if (characters[i]->isAlive())
         {
             Ninja &ninja = dynamic_cast<Ninja &>(*(characters[i]));
-            Character* closestEnemy = findClosest(characters[i], otherTeam);
-            ninja.slash(closestEnemy);
+            Character *closestEnemy = findClosest(characters[i], otherTeam);
+            if (ninja.distance(closestEnemy) <= 1)
+            {
+                ninja.slash(closestEnemy);
+            }
+            else
+            {
+                ninja.move(closestEnemy);
+            }
         }
     }
 
-   
     // Cowboys attack enemies with lowest health
     for (unsigned int i = 0; i < cowboyCount; i++)
     {
         if (characters[i]->isAlive())
         {
             Cowboy &cowboy = dynamic_cast<Cowboy &>(*(characters[i]));
-            Character* weakestEnemy = findWeakestEnemy(otherTeam);
-            cowboy.shoot(weakestEnemy);
+            Character *weakestEnemy = findWeakestEnemy(otherTeam);
+            if (cowboy.hasboolets())
+            {
+                cowboy.shoot(weakestEnemy);
+            }
+            else
+            {
+                cowboy.reload();
+            }
         }
     }
-    
 }
 
-Character* Team::findClosest(Character* character, Team* team){
-    Character* closest = NULL;
+Character *Team::findClosest(Character *character, Team *team)
+{
+    Character *closest = NULL;
     int minDistance = INT_MAX;
     for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {
@@ -370,8 +438,9 @@ Character* Team::findClosest(Character* character, Team* team){
     return closest;
 }
 
-Character* SmartTeam::findWeakestEnemy(Team *otherTeam){
-    Character* weakestEnemy = NULL;
+Character *SmartTeam::findWeakestEnemy(Team *otherTeam)
+{
+    Character *weakestEnemy = NULL;
     int minHealth = INT_MAX;
     for (unsigned int i = 0; i < TEAM_SIZE; i++)
     {

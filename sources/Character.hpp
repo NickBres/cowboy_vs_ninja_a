@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Point.hpp"
 #include <string>
 
@@ -11,6 +13,7 @@ namespace ariel
         Point position;
         int health;
         string name;
+        bool inTeam = false,leader = false;
 
     public:
         Character(string name = "", int health = 0, Point position = Point(0, 0));
@@ -22,6 +25,10 @@ namespace ariel
         virtual string print() const;
         void setLocation(Point point);
         int getHealth() const;
+        void addedToTeam();
+        void setLeader();
+        bool isInTeam() const;
+        bool isLeader() const;
 
         Character(const Character &) = default;
         Character &operator=(const Character &) = default;
@@ -37,7 +44,7 @@ namespace ariel
     public:
         Cowboy(string name, Point position);
         void shoot(Character *enemy); // shoot given character
-        bool hasBullets() const;
+        bool hasboolets() const;
         void reload(); // reload bullets
         string print() const override;
         

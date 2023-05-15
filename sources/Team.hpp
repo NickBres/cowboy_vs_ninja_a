@@ -1,5 +1,8 @@
+#pragma once
+
 #include "Character.hpp"
 #include <array>
+#include <stdexcept>
 
 
 namespace ariel

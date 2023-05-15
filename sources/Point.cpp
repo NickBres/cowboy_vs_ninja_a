@@ -36,19 +36,22 @@ void Point::setY(double cor_y){
     this->cor_y = cor_y;
 }
 
-void Point::moveTowards(Point &point1, Point &point2, double dist){
-    if(dist < 0){
-        throw runtime_error( "distance cannot be negative");
+Point Point::moveTowards(const Point& point1, const Point& point2, double dist)
+{
+    if (dist < 0) {
+        throw std::invalid_argument("Distance cannot be negative");
     }
+
     double d = point1.distance(point2);
-    if(d <= dist){
-        point1 = point2;
-    }
-    else{
+    if (d <= dist) {
+        return point2;
+    } else {
         double dx = point2.getX() - point1.getX();
         double dy = point2.getY() - point1.getY();
-        double ratio = dist/d;
-        point1.setX(point1.getX() + dx*ratio);
-        point1.setY(point1.getY() + dy*ratio);
+        double ratio = dist / d;
+        double new_x = point1.getX() + dx * ratio;
+        double new_y = point1.getY() + dy * ratio;
+        return Point(new_x, new_y);
     }
 }
+
